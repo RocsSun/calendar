@@ -36,9 +36,6 @@ func (g GParse) ParseHolidayUri(year int, in []byte) (res string) {
 
 	for _, v := range result {
 		if len(re.FindAll(v[0], -1)) == 1 && len(zc.FindAll(v[1], -1)) == 1 {
-			//res = v[1]
-			//res = append(res, v[1]...)
-			//fmt.Println(*(*string)(unsafe.Pointer(&v[0])), *(*string)(unsafe.Pointer(&v[1])))
 
 			if resMap[*(*string)(unsafe.Pointer(&v[1]))] {
 				continue
@@ -48,12 +45,6 @@ func (g GParse) ParseHolidayUri(year int, in []byte) (res string) {
 			res = *(*string)(unsafe.Pointer(&v[1]))
 
 		}
-		//if len(zc.FindAll(v[1], -1)) == 1 {
-		//	fmt.Println(*(*string)(unsafe.Pointer(&v[1])))
-		//}
-
-		//resMap[*(*string)(unsafe.Pointer(&v[1]))] = 0
-
 	}
 	return res
 }

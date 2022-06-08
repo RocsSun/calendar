@@ -18,6 +18,7 @@ type GSpider struct{}
 func (g GSpider) Get(uri string) (res *http.Response, err error) {
 	if uri == "" {
 		//return http.Response{}, errors.New("search info is null. ")
+		log.Fatalln("GSpider.Get, uri 不能为空。")
 	}
 	res, err = http.Get(uri)
 	return
@@ -48,38 +49,33 @@ func (g GSpider) MakeSearchURL(info string) string {
 func (g GSpider) HolidayDetail(year int) (*http.Response, error) {
 	res := g.SearchHolidayUri(year)
 	if res == "" {
-		return nil, errors.New("放假通知url为空。")
+		return nil, errors.New("放假通知url为空。或者未找到相关的年份的放假安排通知。")
 	}
-
 	return g.Get(res)
 }
 
 func (g GSpider) SearchHolidayUri(year int) string {
 	if year < 2007 {
-		log.Println("search holiday must after 2007.")
-		return ""
+		log.Fatalln("search holiday must after 2007.")
+		//return ""
 	}
 	r, err := GSpider{}.SearchHoliday(year)
 
 	defer r.Body.Close()
 	if err != nil {
-		log.Println(err)
-		return ""
+		log.Fatalln(err)
+		//return ""
 	}
 	if r.StatusCode != 200 {
-		log.Println("response status code is ", r.StatusCode)
-		return ""
+		log.Fatalln("response status code is ", r.StatusCode)
+		//return ""
 	}
 
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println(err)
-		return ""
+		log.Fatalln(err)
+		//return ""
 	}
 	res := parse.GParse{}.ParseHolidayUri(year, b)
 	return res
-}
-
-func SearchHolidayUri(year int) string {
-	return GSpider{}.SearchHolidayUri(year)
 }
