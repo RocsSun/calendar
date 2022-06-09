@@ -1,10 +1,10 @@
 package gov
 
 import (
-	"calendar/spider/parse"
-	"calendar/utils"
 	"errors"
 	"fmt"
+	"gitee.com/RocsSun/calendar/spider/parse"
+	"gitee.com/RocsSun/calendar/utils"
 	"io/ioutil"
 	"log"
 	"net/http"

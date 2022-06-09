@@ -1,12 +1,11 @@
 package holiday
 
 import (
-	"calendar/spider/gov"
-	"calendar/spider/parse"
-	"calendar/utils"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"gitee.com/RocsSun/calendar/spider/gov"
+	"gitee.com/RocsSun/calendar/spider/parse"
+	"gitee.com/RocsSun/calendar/utils"
 	"io/ioutil"
 	"log"
 	"regexp"
@@ -89,18 +88,7 @@ func CurrentYearWorkCalendarToJson(fp string) {
 
 // WorkCalendarToJson 生成指定年份的节假日信息到给定的json文件。
 func WorkCalendarToJson(year int, fp string) {
-	if fp == "" {
-		log.Fatalln("文件名称为空。")
-	}
-	b, err := json.Marshal(WorkCalendar(year))
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-	err = ioutil.WriteFile(fp, b, 777)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	utils.MapToJsonFile(WorkCalendar(year), fp)
 }
 
 // parseHolidayDate 解析国务院具体的放假安排，具体到每一天，false为放假。true为工作日。
