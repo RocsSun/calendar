@@ -38,7 +38,8 @@ func TestNewCountTime1(t *testing.T) {
 		t.Error("NewCountTime nil.")
 	}
 
-	if cli.EffectTime() == float64(3.43) {
+	tt := cli.EffectTime()
+	if tt != float64(2.43) {
 		t.Error("count filed! ")
 	}
 }
@@ -55,9 +56,7 @@ func TestNewCountTime3(t *testing.T) {
 	if cli == nil {
 		t.Error("NewCountTime nil.")
 	}
-
-	fmt.Println(cli.EffectTime())
-	if cli.EffectTime() != 3.43 {
+	if cli.EffectTime() != float64(3.43) {
 		t.Error("count filed! ")
 	}
 }

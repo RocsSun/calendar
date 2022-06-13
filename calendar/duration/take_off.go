@@ -23,9 +23,7 @@ var dateMap map[string]bool
 // countDays 计算天数
 func (c *CountTime) countDays() float64 {
 	var days = 0.0
-	fmt.Println("end date: ", c.End.Format("2006-01-02"))
-	for i := c.Start; c.End.Sub(i).Hours() > 24; i = i.Add(24 * time.Hour) {
-		fmt.Println(i.Format("2006-01-02"))
+	for i := c.Start; c.End.Sub(i).Hours() >= 24; i = i.Add(24 * time.Hour) {
 		if dateMap[i.Format("2006-01-02")] {
 			days++
 		}
@@ -50,7 +48,7 @@ func (c *CountTime) countHours() float64 {
 	}
 
 	// 请假结束时间到第二天早上的
-	if c.AmStart.Sub(c.End) > 0 {
+	if c.AmStart.Sub(c.End).Minutes() > 0 {
 		c.End = c.AmStart
 	}
 
