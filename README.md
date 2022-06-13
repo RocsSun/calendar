@@ -1,23 +1,21 @@
 # calendar
 
 #### 介绍
-工作日历。
+生成法定节假日和股市交易日历。调休请假有效时长计算。
 
 #### 软件架构
-软件架构说明
+编写了cli代码，可以直接cli使用，也可以使用源码。
 
 
 #### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1. `git clone https://gitee.com/RocsSun/calendar.git`
+2. `cd calendar`
+3. `go build .`
 
 #### 使用说明
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1.  `./calendar -h`
 
 #### 参与贡献
 
