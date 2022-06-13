@@ -64,7 +64,7 @@ func WorkCalendar(year int) map[string]bool {
 		return nil
 	}
 
-	for i := st; et.Sub(i) >= 0; i = i.Add(24 * time.Hour) {
+	for i := st; et.Sub(i).Hours() >= 0; i = i.Add(24 * time.Hour) {
 		if v, ok := holiday[i.Format("2006-01-02")]; ok {
 			res[i.Format("2006-01-02")] = v
 		} else if i.Weekday() == 0 || i.Weekday() == 6 {
@@ -133,7 +133,7 @@ func parseHolidayDate(in string, dm map[string]bool) {
 		return
 	}
 
-	for i := st; et.Sub(i) >= 0; i = i.Add(24 * time.Hour) {
+	for i := st; et.Sub(i).Hours() >= 0; i = i.Add(24 * time.Hour) {
 		dm[i.Format("2006-01-02")] = false
 	}
 
