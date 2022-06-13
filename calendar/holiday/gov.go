@@ -3,6 +3,8 @@ package holiday
 import (
 	"errors"
 	"fmt"
+	"gitee.com/RocsSun/calendar/cache"
+	"gitee.com/RocsSun/calendar/constants"
 	"gitee.com/RocsSun/calendar/spider/gov"
 	"gitee.com/RocsSun/calendar/spider/parse"
 	"gitee.com/RocsSun/calendar/utils"
@@ -46,6 +48,10 @@ func GovHoliday(year int) map[string]bool {
 func WorkCalendar(year int) map[string]bool {
 	res := make(map[string]bool)
 
+	if check(year) {
+		readCache(year, res)
+	}
+
 	holiday := GovHoliday(year)
 
 	if holiday == nil {
@@ -73,6 +79,8 @@ func WorkCalendar(year int) map[string]bool {
 			res[i.Format("2006-01-02")] = true
 		}
 	}
+
+	updateCache(year, res)
 	return res
 }
 
@@ -144,4 +152,29 @@ func parseHolidayDate(in string, dm map[string]bool) {
 			dm[dt] = true
 		}
 	}
+}
+
+func check(year int) bool {
+	if _, ok := constants.WorkCalendarMap[fmt.Sprintf("%d-01-01", year)]; ok {
+		return true
+	}
+	return false
+}
+
+func readCache(year int, r map[string]bool) map[string]bool {
+	st, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", year))
+	ed, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-12-31", year))
+	for i := st; ed.Sub(i).Hours() >= 0; i = i.Add(24 * time.Hour) {
+		r[i.Format("2006-01-02")] = constants.WorkCalendarMap[i.Format("2006-01-02")]
+	}
+	return r
+}
+
+func updateCache(year int, r map[string]bool) {
+	st, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", year))
+	ed, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-12-31", year))
+	for i := st; ed.Sub(i).Hours() >= 0; i = i.Add(24 * time.Hour) {
+		constants.WorkCalendarMap[i.Format("2006-01-02")] = r[i.Format("2006-01-02")]
+	}
+	cache.UpdateCalendar()
 }

@@ -2,7 +2,9 @@ package duration
 
 import (
 	"fmt"
+	"gitee.com/RocsSun/calendar/cache"
 	"gitee.com/RocsSun/calendar/calendar/holiday"
+	"gitee.com/RocsSun/calendar/constants"
 	"github.com/shopspring/decimal"
 	"strings"
 	"time"
@@ -18,13 +20,13 @@ type CountTime struct {
 	PmEnd   time.Time
 }
 
-var dateMap map[string]bool
+//var dateMap map[string]bool
 
 // countDays 计算天数
 func (c *CountTime) countDays() float64 {
 	var days = 0.0
 	for i := c.Start; c.End.Sub(i).Hours() >= 24; i = i.Add(24 * time.Hour) {
-		if dateMap[i.Format("2006-01-02")] {
+		if constants.WorkCalendarMap[i.Format("2006-01-02")] {
 			days++
 		}
 	}
@@ -34,8 +36,8 @@ func (c *CountTime) countDays() float64 {
 
 // countHours 计算请假的时间。
 func (c *CountTime) countHours() float64 {
-	var effectTime float64 = 0.0
-	var balance float64 = 0.0
+	var effectTime = 0.0
+	var balance = 0.0
 
 	// 请假时间早于上班时间
 	if c.AmStart.Sub(c.Start) > 0 {
@@ -98,16 +100,17 @@ func NewCountTime(start, end, amStart, amEnd, pmStart, pmEnd string) *CountTime 
 	}
 	dateTmp := strings.Split(end, " ")[0]
 
-	if _, ok := dateMap[start]; !ok {
-		dateMap = holiday.WorkCalendar(parse(start).Year())
+	if _, ok := constants.WorkCalendarMap[start]; !ok {
+		constants.WorkCalendarMap = holiday.WorkCalendar(parse(start).Year())
+		cache.UpdateCalendar()
 	}
-	if _, ok := dateMap[start]; !ok {
+	if _, ok := constants.WorkCalendarMap[start]; !ok {
 		for k, v := range holiday.WorkCalendar(parse(end).Year()) {
-			dateMap[k] = v
+			constants.WorkCalendarMap[k] = v
 		}
 	}
 
-	if _, ok := dateMap[dateTmp]; !ok {
+	if _, ok := constants.WorkCalendarMap[dateTmp]; !ok {
 		fmt.Println("未生成该年份的节假日日历。")
 		return nil
 	}
@@ -120,4 +123,9 @@ func NewCountTime(start, end, amStart, amEnd, pmStart, pmEnd string) *CountTime 
 		PmStart: parse(fmt.Sprintf("%s %s", dateTmp, pmStart)),
 		PmEnd:   parse(fmt.Sprintf("%s %s", dateTmp, pmEnd)),
 	}
+}
+
+func EffectTimes(start, end, amStart, amEnd, pmStart, pmEnd string) float64 {
+	cli := NewCountTime(start, end, amStart, amEnd, pmStart, pmEnd)
+	return cli.EffectTime()
 }
