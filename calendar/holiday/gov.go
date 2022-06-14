@@ -49,7 +49,7 @@ func WorkCalendar(year int) map[string]bool {
 	res := make(map[string]bool)
 
 	if check(year) {
-		readCache(year, res)
+		return readCache(year, res)
 	}
 
 	holiday := GovHoliday(year)
