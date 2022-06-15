@@ -49,7 +49,7 @@ func WorkCalendar(year int) map[string]bool {
 	res := make(map[string]bool)
 
 	if check(year) {
-		return readCache(year, res)
+		return readCache(year)
 	}
 
 	holiday := GovHoliday(year)
@@ -155,26 +155,24 @@ func parseHolidayDate(in string, dm map[string]bool) {
 }
 
 func check(year int) bool {
-	if _, ok := constants.WorkCalendarMap[fmt.Sprintf("%d-01-01", year)]; ok {
+	if _, ok := constants.WorkCalendarMap[year]; ok {
 		return true
 	}
 	return false
 }
 
-func readCache(year int, r map[string]bool) map[string]bool {
-	st, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", year))
-	ed, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-12-31", year))
-	for i := st; ed.Sub(i).Hours() >= 0; i = i.Add(24 * time.Hour) {
-		r[i.Format("2006-01-02")] = constants.WorkCalendarMap[i.Format("2006-01-02")]
-	}
-	return r
+func readCache(year int) map[string]bool {
+	return constants.WorkCalendarMap[year]
 }
 
 func updateCache(year int, r map[string]bool) {
-	st, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", year))
-	ed, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-12-31", year))
-	for i := st; ed.Sub(i).Hours() >= 0; i = i.Add(24 * time.Hour) {
-		constants.WorkCalendarMap[i.Format("2006-01-02")] = r[i.Format("2006-01-02")]
+	//res := make(map[string]bool)
+	//for k, v := range r {
+	//	res
+	//}
+
+	if len(r) != 0 {
+		constants.WorkCalendarMap[year] = r
+		cache.UpdateCalendar()
 	}
-	cache.UpdateCalendar()
 }

@@ -2,7 +2,6 @@ package duration
 
 import (
 	"fmt"
-	"gitee.com/RocsSun/calendar/cache"
 	"gitee.com/RocsSun/calendar/calendar/holiday"
 	"gitee.com/RocsSun/calendar/constants"
 	"github.com/shopspring/decimal"
@@ -26,7 +25,7 @@ type CountTime struct {
 func (c *CountTime) countDays() float64 {
 	var days = 0.0
 	for i := c.Start; c.End.Sub(i).Hours() >= 24; i = i.Add(24 * time.Hour) {
-		if constants.WorkCalendarMap[i.Format("2006-01-02")] {
+		if constants.WorkCalendarMap[i.Year()][i.Format("2006-01-02")] {
 			days++
 		}
 	}
@@ -98,26 +97,26 @@ func NewCountTime(start, end, amStart, amEnd, pmStart, pmEnd string) *CountTime 
 		}
 		return t
 	}
+
+	st := parse(start)
+	ed := parse(end)
 	dateTmp := strings.Split(end, " ")[0]
 
-	if _, ok := constants.WorkCalendarMap[start]; !ok {
-		constants.WorkCalendarMap = holiday.WorkCalendar(parse(start).Year())
-		cache.UpdateCalendar()
+	if _, ok := constants.WorkCalendarMap[st.Year()]; !ok {
+		holiday.WorkCalendar(st.Year())
 	}
-	if _, ok := constants.WorkCalendarMap[start]; !ok {
-		for k, v := range holiday.WorkCalendar(parse(end).Year()) {
-			constants.WorkCalendarMap[k] = v
-		}
+	if _, ok := constants.WorkCalendarMap[ed.Year()]; !ok {
+		holiday.WorkCalendar(ed.Year())
 	}
 
-	if _, ok := constants.WorkCalendarMap[dateTmp]; !ok {
+	if _, ok := constants.WorkCalendarMap[st.Year()]; !ok {
 		fmt.Println("未生成该年份的节假日日历。")
 		return nil
 	}
 
 	return &CountTime{
-		Start:   parse(start),
-		End:     parse(end),
+		Start:   st,
+		End:     ed,
 		AmStart: parse(fmt.Sprintf("%s %s", dateTmp, amStart)),
 		AmEnd:   parse(fmt.Sprintf("%s %s", dateTmp, amEnd)),
 		PmStart: parse(fmt.Sprintf("%s %s", dateTmp, pmStart)),

@@ -14,7 +14,7 @@ func ShareTradeCalendar(year int) map[string]bool {
 	res := make(map[string]bool)
 
 	if check(year) {
-		return readCache(year, res)
+		return readCache(year)
 	}
 
 	hol := holiday.GovHoliday(year)
@@ -64,26 +64,20 @@ func CurrentYearShareTradeCalendarToJson(fp string) {
 	utils.MapToJsonFile(ShareTradeCalendar(time.Now().Year()), fp)
 }
 
-func readCache(year int, r map[string]bool) map[string]bool {
-	st, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", year))
-	ed, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-12-31", year))
-	for i := st; ed.Sub(i).Hours() >= 0; i = i.Add(24 * time.Hour) {
-		r[i.Format("2006-01-02")] = constants.ShareCalendarMap[i.Format("2006-01-02")]
-	}
-	return r
+func readCache(year int) map[string]bool {
+	return constants.ShareCalendarMap[year]
 }
 
 func updateCache(year int, r map[string]bool) {
-	st, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-01-01", year))
-	ed, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-12-31", year))
-	for i := st; ed.Sub(i).Hours() >= 0; i = i.Add(24 * time.Hour) {
-		constants.ShareCalendarMap[i.Format("2006-01-02")] = r[i.Format("2006-01-02")]
+
+	if len(r) != 0 {
+		constants.ShareCalendarMap[year] = r
+		cache.UpdateCalendar()
 	}
-	cache.UpdateCalendar()
 }
 
 func check(year int) bool {
-	if _, ok := constants.ShareCalendarMap[fmt.Sprintf("%d-01-01", year)]; ok {
+	if _, ok := constants.ShareCalendarMap[year]; ok {
 		return true
 	}
 	return false
