@@ -3,8 +3,8 @@ package gov
 import (
 	"errors"
 	"fmt"
-	"gitee.com/RocsSun/calendar/spider/parse"
-	"gitee.com/RocsSun/calendar/utils"
+	"github.com/RocsSun/calendar/spider/parse"
+	"github.com/RocsSun/calendar/utils"
 	"io/ioutil"
 	"log"
 	"net/http"

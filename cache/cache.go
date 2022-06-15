@@ -1,8 +1,8 @@
 package cache
 
 import (
-	"gitee.com/RocsSun/calendar/constants"
-	"gitee.com/RocsSun/calendar/utils"
+	"github.com/RocsSun/calendar/constants"
+	"github.com/RocsSun/calendar/utils"
 )
 
 func InitCalendar() {

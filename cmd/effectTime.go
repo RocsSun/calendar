@@ -7,7 +7,7 @@ package cmd
 
 import (
 	"fmt"
-	"gitee.com/RocsSun/calendar/calendar/duration"
+	"github.com/RocsSun/calendar/calendar/duration"
 	"github.com/spf13/cobra"
 )
 

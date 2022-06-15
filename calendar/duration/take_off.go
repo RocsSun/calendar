@@ -2,9 +2,9 @@ package duration
 
 import (
 	"fmt"
-	"gitee.com/RocsSun/calendar/cache"
-	"gitee.com/RocsSun/calendar/calendar/holiday"
-	"gitee.com/RocsSun/calendar/constants"
+	"github.com/RocsSun/calendar/cache"
+	"github.com/RocsSun/calendar/calendar/holiday"
+	"github.com/RocsSun/calendar/constants"
 	"github.com/shopspring/decimal"
 	"strings"
 	"time"

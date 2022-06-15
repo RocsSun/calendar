@@ -2,7 +2,7 @@ package duration_test
 
 import (
 	"fmt"
-	"gitee.com/RocsSun/calendar/calendar/duration"
+	"github.com/RocsSun/calendar/calendar/duration"
 	"testing"
 )
 
