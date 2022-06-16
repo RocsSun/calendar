@@ -22,7 +22,7 @@ var (
 
 // effectTimeCmd represents the effectTime command
 var effectTimeCmd = &cobra.Command{
-	Use:   "effectTime",
+	Use:   "time",
 	Short: "计算有效的调休/请假时长。",
 	Long: `计算两个时间日期中间的工作日请假或者是调休时间。
 	effectTime:
