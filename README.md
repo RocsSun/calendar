@@ -9,15 +9,15 @@
 
 #### 编译
 
-1. `git clone https://gitee.com/RocsSun/calendar.git`
+1. `git clone https://github.com/RocsSun/calendar.git`
 2. `cd calendar/cmd/calendar`
 3. `go build .`
 4. `./calendar -h`
 
 #### 引入代码
 
-1. `go get gitee.com/RocsSun/calendar`
-2. `_ "gitee.com/RocsSun/calendar/cache"` # 添加本地缓存文件。
+1. `go get github.com/RocsSun/calendar`
+2. `_ "github.com/RocsSun/calendar/cache"` # 添加本地缓存文件。
 3. 核心逻辑在calendar下，导入对应的包使用。
 
 #### 使用说明

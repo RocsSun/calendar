@@ -2,10 +2,10 @@ package shares
 
 import (
 	"fmt"
-	"gitee.com/RocsSun/calendar/cache"
-	"gitee.com/RocsSun/calendar/calendar/holiday"
-	"gitee.com/RocsSun/calendar/constants"
-	"gitee.com/RocsSun/calendar/utils"
+	"github.com/RocsSun/calendar/cache"
+	"github.com/RocsSun/calendar/calendar/holiday"
+	"github.com/RocsSun/calendar/constants"
+	"github.com/RocsSun/calendar/utils"
 	"time"
 )
 
