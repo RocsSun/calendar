@@ -25,7 +25,7 @@ var effectTimeCmd = &cobra.Command{
 	Use:   "time",
 	Short: "计算有效的调休/请假时长。",
 	Long: `计算两个时间日期中间的工作日请假或者是调休时间。
-	effectTime:
+	time:
 		--start YYYY-MM-DD hh:mm 开始时间
 		--end YYYY-MM-DD hh:mm 结束时间
 		--amStart 早上上班时间
@@ -38,7 +38,7 @@ var effectTimeCmd = &cobra.Command{
 			fmt.Println(duration.EffectTimes(_start, _end, _amStart, _amEnd, _pmStart, _pmEnd))
 		}
 	},
-	Example: `calendar effectTime --start YYYY-MM-DD hh:mm --end YYYY-MM-DD hh:mm --amStart hh:mm --amEnd hh:mm --pmStart hh:mm --pmEnd hh:mm 计算有效的请假或者调休时长。`,
+	Example: `calendar time --start YYYY-MM-DD hh:mm --end YYYY-MM-DD hh:mm --amStart hh:mm --amEnd hh:mm --pmStart hh:mm --pmEnd hh:mm 计算有效的请假或者调休时长。`,
 }
 
 func init() {
@@ -51,12 +51,6 @@ func init() {
 	effectTimeCmd.Flags().StringVar(&_amEnd, "amEnd", "", "早上下班时间")
 	effectTimeCmd.Flags().StringVar(&_pmStart, "pmStart", "", "下午上班时间")
 	effectTimeCmd.Flags().StringVar(&_pmEnd, "pmEnd", "", "下午下班时间")
-	//effectTimeCmd.Flags().StringVarP(&_start, "开始时间", "s", "", "指定年份的节假日")
-	//effectTimeCmd.Flags().StringVarP(&_end, "结束时间", "e", "", "指定年份的节假日")
-	//effectTimeCmd.Flags().StringVarP(&_amStart, "早上上班时间", "amStart", "", "指定年份的节假日")
-	//effectTimeCmd.Flags().StringVarP(&_amEnd, "早上下班时间", "amEnd", "", "指定年份的节假日")
-	//effectTimeCmd.Flags().StringVarP(&_pmStart, "下午上班时间", "pmStart", "", "指定年份的节假日")
-	//effectTimeCmd.Flags().StringVarP(&_pmEnd, "下午下班时间", "pmEnd", "", "指定年份的节假日")
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
