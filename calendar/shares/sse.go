@@ -49,6 +49,22 @@ func ShareTradeCalendar(year int) map[string]bool {
 	return res
 }
 
+// PreTradeDay 前一个交易日。
+func PreTradeDay(t time.Time) time.Time {
+	var res map[string]bool
+	if v, ok := constants.ShareCalendarMap[t.Year()]; !ok {
+		res = ShareTradeCalendar(time.Now().Year())
+	} else {
+		res = v
+	}
+
+	i := t.Add(-24 * time.Hour)
+	for !res[i.Format("2006-01-02")] {
+		i = i.Add(-24 * time.Hour)
+	}
+	return i
+}
+
 // CurrentYearShareTradeCalendar 当前年份的节假日信息。
 func CurrentYearShareTradeCalendar() map[string]bool {
 	return ShareTradeCalendar(time.Now().Year())
