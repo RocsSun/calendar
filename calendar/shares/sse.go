@@ -59,16 +59,18 @@ func PreTradeDay(t time.Time) time.Time {
 	}
 
 	i := t.Add(-24 * time.Hour)
+	j := t
 
 	if i.Year() < t.Year() {
-		ShareTradeCalendar(time.Now().Year() - 1)
+		res = ShareTradeCalendar(time.Now().Year() - 1)
 	}
 
 	for !res[i.Format("2006-01-02")] {
-		i = i.Add(-24 * time.Hour)
-		if i.Year() < t.Year() {
-			ShareTradeCalendar(time.Now().Year() - 1)
+		if i.Year() < j.Year() {
+			j = i
+			res = ShareTradeCalendar(time.Now().Year() - 1)
 		}
+		i = i.Add(-24 * time.Hour)
 	}
 
 	return i
