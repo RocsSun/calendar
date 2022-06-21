@@ -2,21 +2,25 @@ package duration
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/RocsSun/calendar/calendar/holiday"
 	"github.com/RocsSun/calendar/constants"
 	"github.com/shopspring/decimal"
-	"strings"
-	"time"
 )
 
 // CountTime 计算有效的请假时间，调休时间。
 type CountTime struct {
-	Start   time.Time
-	End     time.Time
-	AmStart time.Time
-	AmEnd   time.Time
-	PmStart time.Time
-	PmEnd   time.Time
+	Start       time.Time // 请假开始时间
+	End         time.Time // 请假结束时间
+	AmStart     time.Time // 早上上班时间
+	AmEnd       time.Time // 早上下班时间
+	PmStart     time.Time // 下午上班时间
+	PmEnd       time.Time // 下午下班时间
+	offsetStart time.Time // 校验后的请假开始时间
+	offsetEnd   time.Time // 校验后的请假结束时间
+	balance     float64   // 中午休息时间
 }
 
 //var dateMap map[string]bool
@@ -82,6 +86,33 @@ func (c *CountTime) EffectTime() float64 {
 	return c.countDays() + c.countHours()
 }
 
+func (c *CountTime) offset() {
+
+	// 处理请假开始时间。
+	// 处理请假开始时间在下午下班之后的情况。重置时间为第二天的早上上班时间。
+	if c.Start.Hour() >= c.PmEnd.Hour() && c.Start.Minute() >= c.PmEnd.Minute() {
+		c.offsetStart = c.Start.Add(
+			time.Duration(24-c.Start.Hour()+c.AmStart.Hour()) * time.Hour).Add(
+			time.Duration(c.Start.Minute()+c.AmStart.Minute()) * time.Minute)
+	}
+
+	// 处理请假开始时间在早上上班之前的，重置时间为当天早上上班时间。
+	if c.Start.Hour() <= c.AmStart.Hour() && c.Start.Minute() < c.AmStart.Minute() {
+		c.offsetStart = c.Start.Add(
+			time.Duration(c.AmStart.Hour()-c.Start.Hour()) * time.Hour).Add(
+			-time.Duration(c.AmStart.Minute()-c.Start.Minute()) * time.Minute)
+	}
+
+	// 处理请假开始时间在在早上下班之后（含），下午上班之前的（含），重置请假开始时间为当天下午上班时间。
+
+	// 处理请假结束时间。
+	// 处理请假结束时间在上班之前的。重置的前一天的下午下班时间。
+
+	// 处理请假结束时间在下班之后的，重置为当天的下午下班时间。
+
+	// 处理请假结束时间在早上下班之后（含），下午上班之前的（含），重置为当天早上下班时间。
+}
+
 // NewCountTime 生成实例。
 func NewCountTime(start, end, amStart, amEnd, pmStart, pmEnd string) *CountTime {
 
@@ -89,8 +120,7 @@ func NewCountTime(start, end, amStart, amEnd, pmStart, pmEnd string) *CountTime 
 		return nil
 	}
 
-	var parse func(s string) time.Time
-	parse = func(s string) time.Time {
+	var parse = func(s string) time.Time {
 		t, err := time.Parse("2006-01-02 15:04", s)
 		if err != nil {
 			fmt.Println(err)
