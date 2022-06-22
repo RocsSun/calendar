@@ -2,61 +2,62 @@ package duration_test
 
 import (
 	"fmt"
-	"github.com/RocsSun/calendar/calendar/duration"
 	"testing"
+
+	"github.com/RocsSun/calendar/calendar/duration"
 )
 
-func TestNewCountTime(t *testing.T) {
-	start := "2021-12-31 08:00"
-	end := "2022-01-05 08:00"
+func TestEffectTimes(t *testing.T) {
+	start := "2022-01-05 08:30"
+	end := "2022-01-05 17:00"
 	as := "08:30"
 	ae := "11:30"
 	ps := "13:00"
 	pe := "17:00"
+	tim := duration.EffectTimes(start, end, as, ae, ps, pe)
 
-	cli := duration.NewCountTime(start, end, as, ae, ps, pe)
-	if cli == nil {
-		t.Error("NewCountTime nil.")
-	}
-	if cli.EffectTime() != 2.0 {
-
-		fmt.Println(cli.EffectTime())
-		t.Error("count filed! ")
+	if tim != 1 {
+		t.Error("failed!")
 	}
 }
 
 func TestNewCountTime1(t *testing.T) {
-	start := "2021-12-31 08:00"
-	end := "2022-01-05 13:00"
+	start := "2022-01-05 15:30"
+	end := "2022-01-05 17:00"
 	as := "08:30"
 	ae := "11:30"
 	ps := "13:00"
 	pe := "17:00"
-
-	cli := duration.NewCountTime(start, end, as, ae, ps, pe)
-	if cli == nil {
-		t.Error("NewCountTime nil.")
-	}
-
-	tt := cli.EffectTime()
-	if tt != float64(2.43) {
-		t.Error("count filed! ")
+	tim := duration.EffectTimes(start, end, as, ae, ps, pe)
+	if tim != 0.21 {
+		t.Error("failed!")
 	}
 }
 
 func TestNewCountTime3(t *testing.T) {
-	start := "2021-12-31 08:00"
-	end := "2022-01-06 13:00"
+	start := "2022-01-05 13:30"
+	end := "2022-01-05 17:00"
 	as := "08:30"
 	ae := "11:30"
 	ps := "13:00"
 	pe := "17:00"
+	tim := duration.EffectTimes(start, end, as, ae, ps, pe)
 
-	cli := duration.NewCountTime(start, end, as, ae, ps, pe)
-	if cli == nil {
-		t.Error("NewCountTime nil.")
+	if tim != 0.5 {
+		t.Error("failed!")
 	}
-	if cli.EffectTime() != float64(3.43) {
-		t.Error("count filed! ")
+}
+
+func TestNewCountTime4(t *testing.T) {
+	start := "2022-01-05 08:30"
+	end := "2022-01-05 13:30"
+	as := "08:30"
+	ae := "11:30"
+	ps := "13:00"
+	pe := "17:00"
+	tim := duration.EffectTimes(start, end, as, ae, ps, pe)
+	fmt.Println(tim)
+	if tim != 0.5 {
+		t.Error("failed!")
 	}
 }
