@@ -1,38 +1,44 @@
 package shares
 
 import (
+	"errors"
 	"fmt"
+	"github.com/RocsSun/calendar/globals"
+	"log"
+	"time"
+
 	"github.com/RocsSun/calendar/cache"
 	"github.com/RocsSun/calendar/calendar/holiday"
-	"github.com/RocsSun/calendar/constants"
 	"github.com/RocsSun/calendar/utils"
-	"time"
 )
 
 // ShareTradeCalendar 工作日历。false为休息。true为工作日。返回一年的所有的日期的节假日。
-func ShareTradeCalendar(year int) map[string]bool {
+func ShareTradeCalendar(year int) (map[string]bool, error) {
 	res := make(map[string]bool)
 
 	if check(year) {
-		return readCache(year)
+		return readCache(year), nil
 	}
 
-	hol := holiday.GovHoliday(year)
-
+	hol, err := holiday.GovHoliday(year)
+	if err != nil {
+		return nil, err
+	}
 	if hol == nil {
-		return nil
+		return nil, errors.New("放假日期为空，获取失败。")
 	}
+
 	start := fmt.Sprintf("%d-01-01", year)
 	end := fmt.Sprintf("%d-12-31", year)
 
 	st, err := time.Parse("2006-01-02", start)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	et, err := time.Parse("2006-01-02", end)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	for i := st; et.Sub(i) >= 0; i = i.Add(24 * time.Hour) {
@@ -46,14 +52,18 @@ func ShareTradeCalendar(year int) map[string]bool {
 	}
 
 	updateCache(year, res)
-	return res
+	return res, nil
 }
 
 // PreTradeDay 前一个交易日。
-func PreTradeDay(t time.Time) time.Time {
+func PreTradeDay(t time.Time) (time.Time, error) {
 	var res map[string]bool
-	if v, ok := constants.ShareCalendarMap[t.Year()]; !ok {
-		res = ShareTradeCalendar(time.Now().Year())
+	var err error
+	if v, ok := globals.ShareCalendarMap[t.Year()]; !ok {
+		res, err = ShareTradeCalendar(time.Now().Year())
+		if err != nil {
+			return time.Time{}, err
+		}
 	} else {
 		res = v
 	}
@@ -62,49 +72,51 @@ func PreTradeDay(t time.Time) time.Time {
 	j := t
 
 	if i.Year() < t.Year() {
-		res = ShareTradeCalendar(time.Now().Year() - 1)
+		res, err = ShareTradeCalendar(time.Now().Year() - 1)
+		if err != nil {
+			return time.Time{}, err
+		}
 	}
 
 	for !res[i.Format("2006-01-02")] {
 		if i.Year() < j.Year() {
 			j = i
-			res = ShareTradeCalendar(time.Now().Year() - 1)
+
+			res, err = ShareTradeCalendar(time.Now().Year() - 1)
+			if err != nil {
+				return time.Time{}, err
+			}
 		}
 		i = i.Add(-24 * time.Hour)
 	}
 
-	return i
-}
-
-// CurrentYearShareTradeCalendar 当前年份的节假日信息。
-func CurrentYearShareTradeCalendar() map[string]bool {
-	return ShareTradeCalendar(time.Now().Year())
+	return i, nil
 }
 
 // ShareTradeCalendarToJson 指定年份的股票交易日里生成json文件。
 func ShareTradeCalendarToJson(year int, fp string) {
-	utils.MapToJsonFile(ShareTradeCalendar(year), fp)
-}
-
-// CurrentYearShareTradeCalendarToJson 当前年份的股票交易日里生成json文件。
-func CurrentYearShareTradeCalendarToJson(fp string) {
-	utils.MapToJsonFile(ShareTradeCalendar(time.Now().Year()), fp)
+	if b, err := ShareTradeCalendar(year); err != nil {
+		log.Println(err)
+		return
+	} else {
+		utils.MapToJsonFile(b, fp)
+	}
 }
 
 func readCache(year int) map[string]bool {
-	return constants.ShareCalendarMap[year]
+	return globals.ShareCalendarMap[year]
 }
 
 func updateCache(year int, r map[string]bool) {
 
 	if len(r) != 0 {
-		constants.ShareCalendarMap[year] = r
+		globals.ShareCalendarMap[year] = r
 		cache.UpdateCalendar()
 	}
 }
 
 func check(year int) bool {
-	if _, ok := constants.ShareCalendarMap[year]; ok {
+	if _, ok := globals.ShareCalendarMap[year]; ok {
 		return true
 	}
 	return false

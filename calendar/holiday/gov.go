@@ -3,71 +3,81 @@ package holiday
 import (
 	"errors"
 	"fmt"
-	"github.com/RocsSun/calendar/cache"
-	"github.com/RocsSun/calendar/constants"
-	"github.com/RocsSun/calendar/spider/gov"
-	"github.com/RocsSun/calendar/spider/parse"
-	"github.com/RocsSun/calendar/utils"
+	"io"
 	"io/ioutil"
 	"log"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/RocsSun/calendar/cache"
+	"github.com/RocsSun/calendar/globals"
+	"github.com/RocsSun/calendar/spider/gov"
+	"github.com/RocsSun/calendar/spider/parse"
+	"github.com/RocsSun/calendar/utils"
 )
 
 var _year = -9999
 
 // GovHoliday 国务院放假调休安排。false为放假了。true为调班。
-func GovHoliday(year int) map[string]bool {
+func GovHoliday(year int) (map[string]bool, error) {
 	_year = year
 	var dm = make(map[string]bool)
 
 	r, err := gov.GSpider{}.HolidayDetail(year)
 	if err != nil {
-		log.Fatalln(err)
-		return nil
+		return nil, err
 	}
-	defer r.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(r.Body)
 
 	if r.StatusCode != 200 {
-		log.Fatalln(errors.New(fmt.Sprintf("status code is %d, exit. ", r.StatusCode)))
-		return nil
+		return nil, errors.New(fmt.Sprintf("status code is %d, exit. ", r.StatusCode))
 	}
 	rb, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	res := parse.GParse{}.ParseHolidayInfo(rb)
 	for _, v := range res {
-		parseHolidayDate(v, dm)
+		if err = parseHolidayDate(v, dm); err != nil {
+			return nil, err
+		}
 	}
-	return dm
+	return dm, nil
 }
 
 // WorkCalendar 工作日历。false为休息。true为工作日。返回一年的所有的日期的节假日。
-func WorkCalendar(year int) map[string]bool {
+func WorkCalendar(year int) (map[string]bool, error) {
 	res := make(map[string]bool)
 
 	if check(year) {
-		return readCache(year)
+		return readCache(year), nil
 	}
 
-	holiday := GovHoliday(year)
-
+	holiday, err := GovHoliday(year)
+	if err != nil {
+		return nil, err
+	}
 	if holiday == nil {
-		return nil
+		return nil, errors.New("放假日期为空，获取失败。")
 	}
+
 	start := fmt.Sprintf("%d-01-01", year)
 	end := fmt.Sprintf("%d-12-31", year)
 
 	st, err := time.Parse("2006-01-02", start)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	et, err := time.Parse("2006-01-02", end)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	for i := st; et.Sub(i).Hours() >= 0; i = i.Add(24 * time.Hour) {
@@ -81,39 +91,33 @@ func WorkCalendar(year int) map[string]bool {
 	}
 
 	updateCache(year, res)
-	return res
-}
-
-// CurrentYearWorkCalendar 当前年份的节假日信息。
-func CurrentYearWorkCalendar() map[string]bool {
-	return WorkCalendar(time.Now().Year())
-}
-
-// CurrentYearWorkCalendarToJson 将当前年份的节假日信息导出到json文件。
-func CurrentYearWorkCalendarToJson(fp string) {
-	WorkCalendarToJson(time.Now().Year(), fp)
+	return res, nil
 }
 
 // WorkCalendarToJson 生成指定年份的节假日信息到给定的json文件。
 func WorkCalendarToJson(year int, fp string) {
-	utils.MapToJsonFile(WorkCalendar(year), fp)
+	if b, err := WorkCalendar(year); err == nil {
+		utils.MapToJsonFile(b, fp)
+	} else {
+		log.Println(err)
+		return
+	}
+
 }
 
 // parseHolidayDate 解析国务院具体的放假安排，具体到每一天，false为放假。true为工作日。
-func parseHolidayDate(in string, dm map[string]bool) {
+func parseHolidayDate(in string, dm map[string]bool) error {
 	r := regexp.MustCompile(`\d{0,4}年?\d+月\d+日至?\d{0,2}月?\d{0,2}日?`)
 	t := r.FindAllString(in, -1)
 
-	for i, _ := range t {
+	for i := range t {
 		t[i] = strings.ReplaceAll(t[i], "月", "-")
 		t[i] = strings.ReplaceAll(t[i], "日", "")
 	}
 	var tmp []string
 
 	if strings.Contains(t[0], "年") {
-		tm := strings.Split(t[0], "年")[1]
-		tmp = strings.Split(tm, "至")
-
+		tmp = strings.Split(strings.Split(t[0], "年")[1], "至")
 	} else {
 		tmp = strings.Split(t[0], "至")
 	}
@@ -131,14 +135,12 @@ func parseHolidayDate(in string, dm map[string]bool) {
 	end = utils.ModifyDateFormat(end)
 	st, err := time.Parse("2006-01-02", start)
 	if err != nil {
-		log.Fatalln(err)
-		return
+		return err
 	}
 
 	et, err := time.Parse("2006-01-02", end)
 	if err != nil {
-		log.Fatalln(err)
-		return
+		return err
 	}
 
 	for i := st; et.Sub(i).Hours() >= 0; i = i.Add(24 * time.Hour) {
@@ -152,27 +154,24 @@ func parseHolidayDate(in string, dm map[string]bool) {
 			dm[dt] = true
 		}
 	}
+	return nil
 }
 
 func check(year int) bool {
-	if _, ok := constants.WorkCalendarMap[year]; ok {
+	if _, ok := globals.WorkCalendarMap[year]; ok {
 		return true
 	}
 	return false
 }
 
 func readCache(year int) map[string]bool {
-	return constants.WorkCalendarMap[year]
+	return globals.WorkCalendarMap[year]
 }
 
 func updateCache(year int, r map[string]bool) {
-	//res := make(map[string]bool)
-	//for k, v := range r {
-	//	res
-	//}
 
 	if len(r) != 0 {
-		constants.WorkCalendarMap[year] = r
+		globals.WorkCalendarMap[year] = r
 		cache.UpdateCalendar()
 	}
 }

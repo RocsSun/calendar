@@ -1,4 +1,4 @@
-package constants
+package globals
 
 var WorkCalendarMap = make(map[int]map[string]bool)
 var ShareCalendarMap = make(map[int]map[string]bool)

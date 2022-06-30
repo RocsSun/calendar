@@ -1,26 +1,26 @@
 package cache
 
 import (
-	"github.com/RocsSun/calendar/constants"
+	"github.com/RocsSun/calendar/globals"
 	"github.com/RocsSun/calendar/utils"
 )
 
 func InitCalendar() {
-	if utils.IsFile(constants.CacheWorkCalendar) {
-		utils.Decode(constants.CacheWorkCalendar, &constants.WorkCalendarMap)
+	if utils.IsFile(globals.CacheWorkCalendar) {
+		utils.Decode(globals.CacheWorkCalendar, &globals.WorkCalendarMap)
 	}
 
-	if utils.IsFile(constants.CacheShareCalendar) {
-		utils.Decode(constants.CacheShareCalendar, &constants.ShareCalendarMap)
+	if utils.IsFile(globals.CacheShareCalendar) {
+		utils.Decode(globals.CacheShareCalendar, &globals.ShareCalendarMap)
 	}
 }
 
 func UpdateCalendar() {
-	if len(constants.WorkCalendarMap) != 0 {
-		utils.Encoding(constants.CacheWorkCalendar, constants.WorkCalendarMap)
+	if len(globals.WorkCalendarMap) != 0 {
+		utils.Encoding(globals.CacheWorkCalendar, globals.WorkCalendarMap)
 	}
-	if len(constants.ShareCalendarMap) != 0 {
-		utils.Encoding(constants.CacheShareCalendar, constants.ShareCalendarMap)
+	if len(globals.ShareCalendarMap) != 0 {
+		utils.Encoding(globals.CacheShareCalendar, globals.ShareCalendarMap)
 	}
 }
 

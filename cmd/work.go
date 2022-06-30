@@ -8,6 +8,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/RocsSun/calendar/calendar/holiday"
+	"log"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -54,7 +55,12 @@ func init() {
 
 func workCalendar(year int, f string) {
 	if f == "" {
-		fmt.Println(holiday.WorkCalendar(year))
+		c, err := holiday.WorkCalendar(year)
+		if err != nil {
+			log.Println(err)
+		} else {
+			fmt.Println(c)
+		}
 	} else {
 		holiday.WorkCalendarToJson(year, f)
 	}

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/RocsSun/calendar/calendar/holiday"
-	"github.com/RocsSun/calendar/constants"
+	"github.com/RocsSun/calendar/globals"
 	"github.com/shopspring/decimal"
 )
 
@@ -28,7 +28,7 @@ type CountTime struct {
 func (c *CountTime) countDays() float64 {
 	var days = 0.0
 	for i := c.offsetStart; c.offsetEnd.Sub(i).Hours() >= 24; i = i.Add(24 * time.Hour) {
-		if constants.WorkCalendarMap[i.Year()][i.Format("2006-01-02")] {
+		if globals.WorkCalendarMap[i.Year()][i.Format("2006-01-02")] {
 			days++
 		}
 	}
@@ -147,14 +147,14 @@ func NewCountTime(start, end, amStart, amEnd, pmStart, pmEnd string) *CountTime 
 	ed := parse(end)
 	dateTmp := strings.Split(end, " ")[0]
 
-	if _, ok := constants.WorkCalendarMap[st.Year()]; !ok {
+	if _, ok := globals.WorkCalendarMap[st.Year()]; !ok {
 		holiday.WorkCalendar(st.Year())
 	}
-	if _, ok := constants.WorkCalendarMap[ed.Year()]; !ok {
+	if _, ok := globals.WorkCalendarMap[ed.Year()]; !ok {
 		holiday.WorkCalendar(ed.Year())
 	}
 
-	if _, ok := constants.WorkCalendarMap[st.Year()]; !ok {
+	if _, ok := globals.WorkCalendarMap[st.Year()]; !ok {
 		fmt.Println("未生成该年份的节假日日历。")
 		return nil
 	}
