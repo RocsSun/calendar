@@ -53,7 +53,7 @@ func (g GSpider) HolidayDetail(year int) (*http.Response, error) {
 		return nil, err
 	}
 	if res == "" {
-		return nil, errors.New(fmt.Sprintf("放假通知url为空，未找到$d年度的放假安排通知。", year))
+		return nil, errors.New(fmt.Sprintf("放假通知url为空，未找到%d年度的放假安排通知。", year))
 	}
 	return g.Get(res)
 }
